@@ -93,7 +93,7 @@ def main():
   v_print = _v_print
   # Read Password
   szPassword = getpass.getpass("Enter Password:", stream=sys.stdout)
-  mVC = CVimCrypt("serverlst.ini", szPassword)
+  mVC = CVimCrypt(options.cfg_inifile, szPassword)
   szData = mVC.getPlainText()
   serman = CServerManager(szData)
   serman.setSection(options.servername)
