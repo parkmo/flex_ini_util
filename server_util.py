@@ -51,12 +51,15 @@ class CServerManager:
          szValue = szKey
      return szValue
    def getMessageCallback(self, szOrgMessage, cbfProc):
-     SplitedMsg=szOrgMessage.split("$")
+     SplitedMsg=szOrgMessage.split("${")
      szRetMessage = SplitedMsg[0] # pre string
      for InnerMsg in SplitedMsg[1:]:
        szTmpRigtTrimed = InnerMsg.split("}")
-       szFieldname= szTmpRigtTrimed[0].split("{")
-       szValue = str(cbfProc(szFieldname[1]))
+       if ( len(szTmpRigtTrimed) < 2 ):
+         szRetMessage += "${" + szTmpRigtTrimed[0]
+         return szRetMessage
+       szFieldname= szTmpRigtTrimed[0]
+       szValue = str(cbfProc(szFieldname))
        szRetMessage += szValue
        szRetMessage += szTmpRigtTrimed[1]
      return szRetMessage
