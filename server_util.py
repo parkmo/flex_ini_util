@@ -6,10 +6,8 @@ import os
 import sys
 import getpass
 
-g_szVersion = "0.5"
+g_szVersion = "0.6"
 g_OptParser = OptionParser(version="%%prog %s" % (g_szVersion))
-
-somefile="server.lst"
 
 class CVimCrypt:
   def __init__(self, szFilename,szPassword):
@@ -27,7 +25,7 @@ class CVimCrypt:
 class CServerManager:
    def __init__(self, szData):
      self.m_szOrgData = szData
-     self.m_config = configparser.ConfigParser()
+     self.m_config = configparser.RawConfigParser()
      self.m_config.read_string(szData)
      self.m_szSecName = None
    def setSection(self, szSectionName):
@@ -62,15 +60,35 @@ class CServerManager:
        szRetMessage += szValue
        szRetMessage += szTmpRigtTrimed[1]
      return szRetMessage
-   def runCommand(self, szKey):
+   def runCommandOne(self, szKey):
      szBaseCmd=self.getConfigInfo(szKey)
      if ( szBaseCmd is None ):
        print("Error: [config] [%s] is not exist" % (szKey))
        sys.exit(0)
      v_print (2, szBaseCmd)
-     szOutCmd = self.getMessageCallback(szBaseCmd, self.getValueFromSection)
+     szOrgCmd = ""
+     szOutCmd = szBaseCmd
+     while szOrgCmd != szOutCmd:
+       szOrgCmd=szOutCmd
+       szOutCmd = self.getMessageCallback(szOrgCmd, self.getValueFromSection)
      v_print (3, szOutCmd)
      os.system(szOutCmd)
+   def runCommand(self, szKey):
+     loop_index=1
+     if (self.m_szSecName == "loop"): # Loop Section
+       self.m_config['config'][szKey] = self.m_config['loop'][szKey]
+       self.m_config['config']['loop.total']=str(len(self.m_config.sections())-2) # config, loop
+       for szCurSecName in self.m_config.sections():
+         self.setSection(szCurSecName)
+         if ( szCurSecName == "loop" or szCurSecName == "config"):
+           continue
+         self.m_config['config']['loop.index']=str(loop_index)
+         self.m_config['config']['loop.section']=self.m_szSecName
+         loop_index += 1
+         self.runCommandOne(szKey)
+       pass
+     else:
+       self.runCommandOne(szKey)
 
 def _v_print(*verb_args):
   if verb_args[0] > (3 - g_verbosity):
