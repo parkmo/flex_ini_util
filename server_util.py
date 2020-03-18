@@ -6,7 +6,7 @@ import os
 import sys
 import getpass
 
-g_szVersion = "0.6"
+g_szVersion = "0.7"
 g_OptParser = OptionParser(version="%%prog %s" % (g_szVersion))
 
 class CVimCrypt:
@@ -42,8 +42,13 @@ class CServerManager:
        pass
      return szValue
    def getValueFromSection(self, szKey):
+     szTergetSecName = self.m_szSecName
+     globalSplit = szKey.split(":")
+     if ( len(globalSplit) > 1 ): # Need Global Access
+       szTergetSecName = globalSplit[0]
+       szKey = globalSplit[1]
      try:
-       szValue = self.m_config[self.m_szSecName][szKey]
+       szValue = self.m_config[szTergetSecName][szKey]
      except:
        try:
          szValue = self.m_config['config'][szKey]
