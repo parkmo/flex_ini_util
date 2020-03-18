@@ -23,9 +23,16 @@ Options:
   * item of [config] Section : CMD
   * other sections : SEVERNAME
 
-* Example
+* Example1
 <pre>
 # ./server_util.py -s example -c test.info
 Enter Password:
 Example 192.168.1.101 myID myPASS
+</pre>
+
+* Example2
+<pre>
+# ./server_util.py -c show.parent -s example
+Enter Password:
+Parent desc [Test Server], Child desc [Example]
 </pre>
