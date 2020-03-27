@@ -62,6 +62,19 @@ class CServerManager:
          szValue = szKey
      return szValue
    def getMessageCallback(self, szOrgMessage, cbfProc):
+     SplitedMsg=szOrgMessage.rsplit("${",1)
+     szRetMessage = SplitedMsg[0] # pre string
+     for InnerMsg in SplitedMsg[1:]:
+       szTmpRigtTrimed = InnerMsg.split("}",1)
+       if ( len(szTmpRigtTrimed) < 2 ):
+         szRetMessage += "${" + szTmpRigtTrimed[0]
+         return szRetMessage
+       szFieldname= szTmpRigtTrimed[0]
+       szValue = str(cbfProc(szFieldname))
+       szRetMessage += szValue
+       szRetMessage += szTmpRigtTrimed[1]
+     return szRetMessage
+   def getMessageCallback2(self, szOrgMessage, cbfProc):
      SplitedMsg=szOrgMessage.split("${")
      szRetMessage = SplitedMsg[0] # pre string
      for InnerMsg in SplitedMsg[1:]:
@@ -92,7 +105,7 @@ class CServerManager:
      if (self.m_szSecName == "loop"): # Loop Section
        szBaseCmd = self.getConfigInfoBySection(self.m_szSecName, szKey)
        if ( szBaseCmd is None ):
-         print("Error: [config] [%s] is not exist" % (szKey))
+         print("Error: [%s] [%s] is not exist" % (self.m_szSecName, szKey))
          sys.exit(0)
        self.m_config['config'][szKey] = szBaseCmd
        self.m_config['config']['loop.total']=str(len(self.m_config.sections())-2) # config, loop
