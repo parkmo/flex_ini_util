@@ -26,7 +26,11 @@ class CServerManager:
    def __init__(self, szData):
      self.m_szOrgData = szData
      self.m_config = configparser.RawConfigParser()
-     self.m_config.read_string(szData)
+     try:
+       self.m_config.read_string(szData)
+     except:
+       v_print (4, "Error: read ini file.")
+       sys.exit(0)
      self.m_szSecName = None
    def setSection(self, szSectionName):
      if szSectionName in self.m_config.sections():
@@ -34,13 +38,15 @@ class CServerManager:
      else:
        print("Error: no %s exist" % (szSectionName))
        sys.exit(0)
-   def getConfigInfo(self, szKey):
+   def getConfigInfoBySection(self, szSection, szKey):
      szValue = None
      try:
-       szValue = self.m_config['config'][szKey]
+       szValue = self.m_config[szSection][szKey]
      except:
        pass
      return szValue
+   def getConfigInfo(self, szKey):
+     return self.getConfigInfoBySection('config',szKey)
    def getValueFromSection(self, szKey):
      szTergetSecName = self.m_szSecName
      globalSplit = szKey.split(":")
@@ -84,7 +90,11 @@ class CServerManager:
    def runCommand(self, szKey):
      loop_index=1
      if (self.m_szSecName == "loop"): # Loop Section
-       self.m_config['config'][szKey] = self.m_config['loop'][szKey]
+       szBaseCmd = self.getConfigInfoBySection(self.m_szSecName, szKey)
+       if ( szBaseCmd is None ):
+         print("Error: [config] [%s] is not exist" % (szKey))
+         sys.exit(0)
+       self.m_config['config'][szKey] = szBaseCmd
        self.m_config['config']['loop.total']=str(len(self.m_config.sections())-2) # config, loop
        for szCurSecName in self.m_config.sections():
          self.setSection(szCurSecName)
